@@ -1,40 +1,26 @@
-version: 2
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
-    working_repositories: ~/repositories
+  say-hello:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: circleci/python:3.8
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
-      - restore_cache:
-          key: v1-dependencies-{{ checksum "Pipfile.lock" }}
       - run:
-          name: Install Dependencies
-          command: |
-            sudo pip install pipenv
-            pipenv install
-      - save_cache:
-          key: v1-dependencies-{{ checksum "Pipfile.lock" }}
-          paths:
-            - "~/.local/share/virtualenvs"
-      - run:
-          name: Setup SSH for AWS CodeCommit
-          command: |
-            chmod +x scripts/setup-ssh.sh
-            scripts/setup-ssh.sh $SSH_KEY_ID $AWS_DEFAULT_REGION
-      - run:
-          name: Mirror Github Repositories to AWS CodeCommit
-          command: pipenv run python3 src/github-aws-commit-mirror.py
+          name: "Say hello"
+          command: "echo Hello, World!"
 
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  version: 2
-  nightly:
+  say-hello-workflow:
     jobs:
-      - build
-    triggers:
-      - schedule:
-          cron: "0 0 * * *" # Trigger every night at 00:00
-          filters:
-            branches:
-              only:
-                - master
+      - say-hello
